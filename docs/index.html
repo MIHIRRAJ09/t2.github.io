@@ -1,0 +1,179 @@
+import React, { useState, useEffect } from 'react';
+
+// Vocabulary data - Updated with all words we have learned so far
+const vocabularyData = [
+  // Greetings and basic phrases
+  { id: 'arigatou', japanese: 'Arigatou (ありがとう)', english: 'Thank you', hindi: 'धन्यवाद' },
+  { id: 'sumimasen', japanese: 'Sumimasen (すみません)', english: 'Excuse me', hindi: 'माफ़ कीजिए' },
+  { id: 'hajimemashite', japanese: 'Hajimemashite (はじめまして)', english: 'Nice to meet you', hindi: 'आपसे मिलकर ख़ुशी हुई' },
+  { id: 'kudasai', japanese: 'Kudasai (ください)', english: 'Please (when asking)', hindi: 'कृपया' },
+  { id: 'onegai_shimasu', japanese: 'Onegai shimasu (おねがいします)', english: 'Please (formal request)', hindi: 'कृपया' },
+  { id: 'gomen_nasai', japanese: 'Gomen nasai (ごめんなさい)', english: 'I am sorry (serious)', hindi: 'माफ़ कीजिए' },
+  { id: 'ohayou_gozaimasu', japanese: 'Ohayou gozaimasu (おはようございます)', english: 'Good morning', hindi: 'सुप्रभात' },
+  { id: 'konbanwa', japanese: 'Konbanwa (こんばんは)', english: 'Good evening', hindi: 'शुभ संध्या' },
+  { id: 'oyasumi_nasai', japanese: 'Oyasumi nasai (おやすみなさい)', english: 'Good night', hindi: 'शुभ रात्रि' },
+  { id: 'sayounara', japanese: 'Sayounara (さようなら)', english: 'Goodbye', hindi: 'अलविदा' },
+  { id: 'itadakimasu', japanese: 'Itadakimasu (いただきます)', english: 'Before a meal', hindi: 'भोजन शुरू करने से पहले' },
+  { id: 'douitashimashite', japanese: 'Douitashimashite (どういたしまして)', english: "You're welcome", hindi: 'आपका स्वागत है' },
+  
+  // People and simple pronouns
+  { id: 'anata', japanese: 'Anata (あなた)', english: 'You', hindi: 'आप' },
+  { id: 'watashi', japanese: 'Watashi (わたし)', english: 'I / Me', hindi: 'मैं' },
+  { id: 'kare', japanese: 'Kare (かれ)', english: 'He / Him', hindi: 'वह' },
+  { id: 'kanojo', japanese: 'Kanojo (かのじょ)', english: 'She / Her', hindi: 'वह' },
+  { id: 'tomodachi', japanese: 'Tomodachi (ともだち)', english: 'Friend', hindi: 'दोस्त' },
+
+  // Simple questions
+  { id: 'hai', japanese: 'Hai (はい)', english: 'Yes', hindi: 'हाँ' },
+  { id: 'iie', japanese: 'Iie (いいえ)', english: 'No', hindi: 'नहीं' },
+  { id: 'wakarimasu', japanese: 'Wakarimasu (わかります)', english: 'I understand', hindi: 'मैं समझता हूँ' },
+  { id: 'wakarimasen', japanese: 'Wakarimasen (わかりません)', english: "I don't understand", hindi: 'मैं नहीं समझता हूँ' },
+  { id: 'shitsurei_shimasu', japanese: 'Shitsurei shimasu (しつれいします)', english: 'Excuse me (when leaving)', hindi: 'क्षमा करें' },
+  { id: 'doko', japanese: 'Doko (どこ)', english: 'Where', hindi: 'कहाँ' },
+  { id: 'dare', japanese: 'Dare (だれ)', english: 'Who', hindi: 'कौन' },
+  { id: 'itsu', japanese: 'Itsu (いつ)', english: 'When', hindi: 'कब' },
+  { id: 'nani', japanese: 'Nani (なに)', english: 'What', hindi: 'क्या' },
+  { id: 'ikura', japanese: 'Ikura (いくら)', english: 'How much', hindi: 'कितना' },
+
+  // New words from today's lesson
+  { id: 'kazoku', japanese: 'Kazoku (かぞく)', english: 'Family', hindi: 'परिवार' },
+  { id: 'shigoto', japanese: 'Shigoto (しごと)', english: 'Work', hindi: 'काम' },
+  { id: 'gakkou', japanese: 'Gakkō (がっこう)', english: 'School', hindi: 'विद्यालय' },
+  { id: 'tabemono', japanese: 'Tabemono (たべもの)', english: 'Food', hindi: 'खाना' },
+  { id: 'nomimono', japanese: 'Nomimono (のみもの)', english: 'Drink', hindi: 'पेय' },
+];
+
+const App = () => {
+  const [words, setWords] = useState([]);
+  const [matches, setMatches] = useState({});
+  const [message, setMessage] = useState('');
+  const [draggedItem, setDraggedItem] = useState(null);
+
+  // Initialize and shuffle the words on component load
+  useEffect(() => {
+    shuffleWords();
+  }, []);
+
+  // Function to shuffle the vocabulary words for the game
+  const shuffleWords = () => {
+    const shuffledWords = [...vocabularyData].sort(() => Math.random() - 0.5);
+    setWords(shuffledWords);
+    setMatches({});
+    setMessage('');
+  };
+
+  // Drag start event handler
+  const handleDragStart = (e, wordId) => {
+    e.dataTransfer.setData('wordId', wordId);
+    setDraggedItem(wordId);
+  };
+
+  // Drag over event handler to allow dropping
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  // Drop event handler
+  const handleDrop = (e, targetId) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('wordId');
+    setDraggedItem(null);
+
+    // Check if the dragged item matches the drop target
+    if (draggedId === targetId) {
+      // Add the correct match to the state
+      setMatches(prev => ({ ...prev, [draggedId]: true }));
+      setMessage('Correct! That is a great job!');
+    } else {
+      setMessage('Not quite right. Please try again!');
+    }
+
+    // Clear the message after a short delay
+    setTimeout(() => setMessage(''), 2000);
+  };
+
+  // Function to get words that haven't been matched yet
+  const getUnmatchedWords = (type) => {
+    return words.filter(word => !matches[word.id] && type === 'japanese' ? true : type === 'english' ? true : false);
+  };
+
+  // Component to render a draggable Japanese word card
+  const DraggableWordCard = ({ word }) => (
+    <div
+      draggable
+      onDragStart={(e) => handleDragStart(e, word.id)}
+      className="p-4 bg-white text-gray-800 rounded-lg shadow-md cursor-grab transition transform hover:scale-105 active:scale-95"
+    >
+      <div className="font-bold text-lg">{word.japanese}</div>
+    </div>
+  );
+
+  // Component to render a droppable English/Hindi translation card
+  const DroppableTranslationCard = ({ word }) => (
+    <div
+      onDragOver={handleDragOver}
+      onDrop={(e) => handleDrop(e, word.id)}
+      className={`p-4 rounded-lg shadow-inner border-2 border-dashed transition-colors duration-200 ${
+        draggedItem === word.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-100'
+      }`}
+    >
+      <div className="text-sm text-gray-600 font-medium">{word.english} / {word.hindi}</div>
+    </div>
+  );
+
+  return (
+    <div className="font-sans min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl">
+        <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">Sensei's Vocabulary Game</h1>
+        
+        {/* Message area */}
+        <div className="h-8 text-center mb-6">
+          <p className="font-semibold text-lg text-green-600 animate-pulse">{message}</p>
+        </div>
+
+        {/* Drag and Drop Areas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Draggable Japanese words */}
+          <div className="flex flex-col gap-4 p-4 bg-gray-100 rounded-lg shadow-inner">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Japanese Words</h2>
+            {getUnmatchedWords('japanese').map(word => (
+              <DraggableWordCard key={word.id} word={word} />
+            ))}
+          </div>
+
+          {/* Droppable English/Hindi translations */}
+          <div className="flex flex-col gap-4 p-4 bg-gray-100 rounded-lg shadow-inner">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Translations (Drag and Drop Here)</h2>
+            {words.map(word => (
+              <React.Fragment key={word.id}>
+                {matches[word.id] ? (
+                  // Display correctly matched words in a different style
+                  <div className="p-4 bg-green-500 text-white rounded-lg shadow-md transition transform scale-100">
+                    <div className="font-bold text-lg">{word.japanese}</div>
+                    <div className="text-sm mt-1">{word.english} / {word.hindi}</div>
+                  </div>
+                ) : (
+                  // Display the droppable translation card
+                  <DroppableTranslationCard word={word} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* Restart button */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={shuffleWords}
+            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Restart Game
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default App;
